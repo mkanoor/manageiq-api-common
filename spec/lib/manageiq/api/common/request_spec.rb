@@ -1,11 +1,11 @@
 describe ManageIQ::API::Common::Request do
+  let(:cookie) { "x=1\;y=2" }
   let(:request_good) do
-    headers = ActionDispatch::Http::Headers.from_hash({})
-    ActionDispatch::Request.new(headers)
+    ActionDispatch::TestRequest.new('HTTP_COOKIE' => cookie)
   end
 
   let(:request_hash) do
-    { :headers => {'x-rh-identity' => encoded_user_hash}, :original_url => '' }
+    { :headers => {'x-rh-identity' => encoded_user_hash, 'cookie' => cookie}, :original_url => '' }
   end
 
   let(:request_bad) { { :headers => {:blah => 'blah' }, :original_url => 'whatever' } }
@@ -68,7 +68,16 @@ describe ManageIQ::API::Common::Request do
     it "contains header and original_url" do
       described_class.with_request(request_hash) do
         hash = described_class.current.to_h
-        expect(hash).to eq(:headers => {'x-rh-identity' => encoded_user_hash}, :original_url => "")
+        expect(hash).to eq(:headers => {'x-rh-identity' => encoded_user_hash}, :original_url => "://::80")
+      end
+    end
+  end
+
+  context "cookies" do
+    it "validate cookie values" do
+      described_class.with_request(request_good) do |instance|
+        expect(instance.cookie_jar['x']).to eq("1")
+        expect(instance.cookie_jar['y']).to eq("2")
       end
     end
   end

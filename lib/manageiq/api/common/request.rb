@@ -11,9 +11,7 @@ module ManageIQ
         def self.current=(request)
           Thread.current[:current_request] =
             case request
-            when ActionDispatch::Request
-              new(:headers => request.headers, :original_url => request.original_url)
-            when Hash
+            when ActionDispatch::Request, Hash
               new(request)
             when nil
               request
@@ -35,11 +33,11 @@ module ManageIQ
           current.forwardable
         end
 
-        attr_reader :headers, :original_url
+        attr_reader :headers, :original_url, :cookie_jar
 
-        def initialize(headers:, original_url:, **kwargs)
-          headers = from_hash(headers) if headers.kind_of?(Hash)
-          @headers, @original_url = headers, original_url
+        def initialize(request, **kwargs)
+          request = request_from_hash(request) if request.kind_of?(Hash)
+          @headers, @original_url, @cookie_jar = request.headers, request.original_url, request.cookie_jar
         end
 
         def user
@@ -58,10 +56,18 @@ module ManageIQ
 
         private
 
-        def from_hash(hash)
-          ActionDispatch::Http::Headers.from_hash({}).tap do |headers|
-            hash.each { |k, v| headers.add(k, v) }
-          end
+        def headers_from_hash(hash)
+          hash.dup.transform_keys { |key| fix_key_name(key.to_s) }
+        end
+
+        def fix_key_name(key)
+          return key if key.start_with?('HTTP_')
+          "HTTP_#{key.tr('-', '_').upcase}"
+        end
+
+        def request_from_hash(hash)
+          headers = hash[:headers].presence || {}
+          ActionDispatch::TestRequest.new(headers_from_hash(headers))
         end
       end
     end
