@@ -41,6 +41,7 @@ module Insights
             RBACApiClient.configure do |config|
               config.host   = ENV['RBAC_URL'] || 'localhost'
               config.scheme = URI.parse(ENV['RBAC_URL']).try(:scheme) || 'http'
+              config.debugging = true
               dev_credentials(config)
             end
           end
