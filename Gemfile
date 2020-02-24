@@ -7,6 +7,6 @@ require File.join(Bundler::Plugin.index.load_paths("bundler-inject")[0], "bundle
 # Bundler will treat runtime dependencies like base dependencies, and
 # development dependencies will be added by default to the :development group.
 # gem 'rbac-api-client', :git => "https://github.com/RedHatInsights/insights-rbac-api-client-ruby", :branch => "master"
-gem 'rbac-api-client', :git => "https://github.com/mkanoor/insights-rbac-api-client-ruby", :branch => "scoped_roles"
+gem 'rbac-api-client', :git => "https://github.com/mkanoor/insights-rbac-api-client-ruby", :branch => "testing"
 
 gemspec
