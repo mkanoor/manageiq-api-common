@@ -43,6 +43,7 @@ module Insights
               config.scheme = URI.parse(ENV['RBAC_URL']).try(:scheme) || 'http'
               config.debugging = true
               dev_credentials(config)
+              api_key(config)
             end
           end
 
@@ -61,6 +62,10 @@ module Insights
               config.username = ENV.fetch('DEV_USERNAME')
               config.password = ENV.fetch('DEV_PASSWORD')
             end
+          end
+
+          private_class_method def self.api_key(config)
+            config.api_key['x-rh-identity'] = Insights::API::Common::Request.current_forwardable['x-rh-identity']
           end
         end
       end
