@@ -48,6 +48,7 @@ module Insights
 
           private_class_method def self.init(klass)
             headers = Insights::API::Common::Request.current_forwardable
+            Rails.logger.error("In class init #{headers.to_s}")
             klass.new.tap do |api|
               api.api_client.default_headers = api.api_client.default_headers.merge(headers)
             end
